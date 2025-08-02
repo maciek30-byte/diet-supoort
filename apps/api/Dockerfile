@@ -7,16 +7,14 @@ COPY package*.json ./
 COPY nx.json ./
 COPY tsconfig.base.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies
+RUN npm ci
 
 # Copy source code
-COPY api/ ./api/
+COPY apps/api/ ./apps/api/
 COPY libs/ ./libs/
 
-# Build the application
-RUN npm run build:api
-
+# Development mode - use nx serve for hot reload
 EXPOSE 3333
 
-CMD ["node", "dist/api/main.js"]
+CMD ["npm", "run", "serve:api"]

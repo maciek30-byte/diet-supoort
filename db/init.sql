@@ -1,5 +1,5 @@
 -- Initial database setup
-CREATE DATABASE diet_support_db;
+-- Database diet_support_db is already created by POSTGRES_DB env var
 
 -- Create user table
 CREATE TABLE IF NOT EXISTS users (
