@@ -1,18 +1,22 @@
-# Use latest LTS version of Node (currently 22)
-FROM node:22-alpine
+FROM node:18-alpine
 
-# Set working directory
-WORKDIR /usr/src/api
+WORKDIR /app
 
-# Install all dependencies (including dev)
+# Copy package files
 COPY package*.json ./
-RUN pnpm install
+COPY nx.json ./
+COPY tsconfig.base.json ./
 
-# Copy the rest of the code
-COPY . .
+# Install dependencies
+RUN npm ci --only=production
 
-# Expose port (Express default)
-EXPOSE 3000
+# Copy source code
+COPY api/ ./api/
+COPY libs/ ./libs/
 
-# Run in dev mode
-CMD ["npm", "run", "dev"]
+# Build the application
+RUN npm run build:api
+
+EXPOSE 3333
+
+CMD ["node", "dist/api/main.js"]

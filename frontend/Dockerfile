@@ -1,18 +1,31 @@
-# Use latest LTS Node.js (for vite dev server)
-FROM node:22-alpine
+FROM node:18-alpine AS builder
 
-# Set working directory
-WORKDIR /usr/src/frontend
+WORKDIR /app
 
-# Install all dependencies
+# Copy package files
 COPY package*.json ./
-RUN pnpm install
+COPY nx.json ./
+COPY tsconfig.base.json ./
 
-# Copy remaining files
-COPY . .
+# Install dependencies
+RUN npm ci
 
-# Expose Vite dev server port
-EXPOSE 5173
+# Copy source code
+COPY frontend/ ./frontend/
+COPY libs/ ./libs/
 
-# Start Vite in dev mode
-CMD ["npm", "run", "dev"]
+# Build the application
+RUN npm run build:frontend
+
+# Production stage
+FROM nginx:alpine
+
+# Copy built files
+COPY --from=builder /app/dist/frontend /usr/share/nginx/html
+
+# Copy nginx configuration
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
